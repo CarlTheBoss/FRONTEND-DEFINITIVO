@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Comprar Producto</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Comprar Producto</h1>
+    </header>
+    <main>
+      <section class="form-container">
+        {% with messages = get_flashed_messages(with_categories=true) %} {% if
+        messages %} {% for category, message in messages %}
+        <div class="flash-message {{ category }}">{{ message }}</div>
+        {% endfor %} {% endif %} {% endwith %}
+        <form method="post">
+          <div class="form-group">
+            <label for="product">Producto:</label>
+            <select id="product" name="product" required>
+              {% for product in products %}
+              <option value="{{ product.id }}">{{ product.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="unit">Unidad:</label>
+            <select
+              id="unit"
+              name="unit"
+              onchange="toggleQuantityField()"
+              required
+            >
+              {% for unit in units %}
+              <option value="{{ unit.id }}" data-name="{{ unit.nombre }}">
+                {{ unit.nombre }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="form-group" id="quantity-group" style="display: none">
+            <label for="quantity">Cantidad:</label>
+            <input type="number" id="quantity" name="quantity" value="1" />
+          </div>
+          <div class="form-actions">
+            <button type="submit">Comprar</button>
+            <a href="{{ url_for('dashboard') }}">Cancelar</a>
+          </div>
+        </form>
+      </section>
+    </main>
+    <script>
+      function toggleQuantityField() {
+        const unitSelect = document.getElementById("unit");
+        const selectedOption = unitSelect.options[unitSelect.selectedIndex];
+        const unitName = selectedOption.getAttribute("data-name");
+        const quantityGroup = document.getElementById("quantity-group");
+
+        if (unitName === "Unidad" || unitName === "Caja") {
+          quantityGroup.style.display = "block";
+        } else {
+          quantityGroup.style.display = "none";
+        }
+      }
+      // Ejecutar la función al cargar la página para comprobar el estado inicial
+      document.addEventListener("DOMContentLoaded", toggleQuantityField);
+    </script>
+  </body>
+</html>

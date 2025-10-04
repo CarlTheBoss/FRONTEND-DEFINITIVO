@@ -20,6 +20,9 @@
           <a href="{{ url_for('add_product') }}" class="btn btn-add"
             >Añadir Nuevo Producto</a
           >
+          <a href="{{ url_for('purchase_product') }}" class="btn btn-add"
+            >Comprar Producto</a
+          >
         </div>
         <table>
           <thead>
@@ -29,19 +32,20 @@
               <th>Stock</th>
               <th>Categoría</th>
               <th>Marca</th>
-              <th>Unidad</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody>
             {% for product in products %}
-            <tr class="product-row" onclick="openProductModal({{ product.id }}, '{{ product.name }}', '{{ product.price }}', '{{ product.stock }}', '{{ product.nom_cat }}', '{{ product.nom_marca }}', '{{ product.nom_uni }}')">
+            <tr
+              class="product-row"
+              onclick="openProductModal({{ product.id }}, '{{ product.name }}', '{{ product.price }}', '{{ product.stock }}', '{{ product.nom_cat }}', '{{ product.nom_marca }}')"
+            >
               <td>{{ product.name }}</td>
               <td>{{ product.price }}</td>
               <td>{{ product.stock }}</td>
               <td>{{ product.nom_cat }}</td>
               <td>{{ product.nom_marca }}</td>
-              <td>{{ product.nom_uni }}</td>
               <td class="actions-cell" onclick="event.stopPropagation()">
                 <a
                   href="{{ url_for('edit_product', product_id=product.id) }}"
@@ -65,7 +69,7 @@
             </tr>
             {% else %}
             <tr>
-              <td colspan="7">No se encontraron productos.</td>
+              <td colspan="6">No se encontraron productos.</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -204,6 +208,53 @@
         </section>
       </div>
     </main>
+
+    <section class="product-table">
+      <div class="section-header">
+        <h2>Historial de Compras</h2>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Producto</th>
+            <th>Unidad</th>
+            <th>Cantidad</th>
+            <th>Fecha</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for purchase in purchase_history %}
+          <tr>
+            <td>{{ purchase.product_name }}</td>
+            <td>{{ purchase.unit_name }}</td>
+            <td>{{ purchase.quantity }}</td>
+            <td>{{ purchase.timestamp }}</td>
+            <td class="actions-cell">
+              <form
+                action="{{ url_for('delete_purchase_route', purchase_id=purchase.id) }}"
+                method="post"
+                style="display: inline"
+              >
+                <button
+                  type="submit"
+                  class="btn btn-delete"
+                  onclick="return confirm('¿Estás seguro de que quieres eliminar este registro?');"
+                >
+                  Borrar
+                </button>
+              </form>
+            </td>
+          </tr>
+          {% else %}
+          <tr>
+            <td colspan="5">No hay compras registradas.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
     <footer>
       <p>Dashboard creado con Flask y consumiendo 4 APIs.</p>
     </footer>
@@ -246,27 +297,27 @@
     </div>
 
     <script>
-      function openProductModal(id, name, price, stock, category, brand, unit) {
-        document.getElementById('modal-id').textContent = id;
-        document.getElementById('modal-name').textContent = name;
-        document.getElementById('modal-price').textContent = '$' + price;
-        document.getElementById('modal-stock').textContent = stock + ' unidades';
-        document.getElementById('modal-category').textContent = category;
-        document.getElementById('modal-brand').textContent = brand;
-        document.getElementById('modal-unit').textContent = unit;
-        document.getElementById('productModal').style.display = 'flex';
+      function openProductModal(id, name, price, stock, category, brand) {
+        document.getElementById("modal-id").textContent = id;
+        document.getElementById("modal-name").textContent = name;
+        document.getElementById("modal-price").textContent = "$" + price;
+        document.getElementById("modal-stock").textContent =
+          stock + " unidades";
+        document.getElementById("modal-category").textContent = category;
+        document.getElementById("modal-brand").textContent = brand;
+        document.getElementById("productModal").style.display = "flex";
       }
 
       function closeProductModal() {
-        document.getElementById('productModal').style.display = 'none';
+        document.getElementById("productModal").style.display = "none";
       }
 
-      window.onclick = function(event) {
-        const modal = document.getElementById('productModal');
+      window.onclick = function (event) {
+        const modal = document.getElementById("productModal");
         if (event.target == modal) {
           closeProductModal();
         }
-      }
+      };
     </script>
   </body>
 </html>

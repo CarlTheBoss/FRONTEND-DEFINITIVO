@@ -53,20 +53,6 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label for="unit">Unidad:</label>
-                    <select id="unit" name="unit" onchange="toggleQuantityField()">
-                        {% for unit in units %}
-                        <option value="{{ unit.id }}" data-name="{{ unit.nombre }}" {% if unit.id == (product.get('id_uni') or product.get('unit'))|int %}selected{% endif %}>
-                            {{ unit.nombre }}
-                        </option>
-                        {% endfor %}
-                    </select>
-                </div>
-                <div class="form-group" id="quantity-group" style="display: none;">
-                    <label for="quantity">Cantidad:</label>
-                    <input type="number" id="quantity" name="quantity" value="{{ product.get('quantity', '1') }}">
-                </div>
-                <div class="form-group">
                     <label for="state">Estado:</label>
                     <select id="state" name="state">
                         <option value="Y" {% if (product.get('estado') or product.get('state')) == 'Y' %}selected{% endif %}>Activo</option>

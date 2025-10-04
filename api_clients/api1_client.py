@@ -1,6 +1,6 @@
 import requests
 
-API_URL = "https://8080-firebase-product-service-java-1759371536787.cluster-fsmcisrvfbb5cr5mvra3hr3qyg.cloudworkstations.dev/api/v1/products"
+API_URL = "https://product-service-java.onrender.com/api/v1/products"
 
 def get_all_products():
     """
