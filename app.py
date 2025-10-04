@@ -1,152 +1,149 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
-from api_clients import api1_client, api2_client, api3_client, api4_client
+import requests
+from gateway import api_bp # Importar el Blueprint
+from flask_cors import CORS
 
 app = Flask(__name__)
 app.secret_key = 'supersecretkey'
+CORS(app) # Habilitar CORS en la app principal
+
+# Registrar el Blueprint del API Gateway con el prefijo /api
+app.register_blueprint(api_bp, url_prefix='/api')
+
+# La URL base para las llamadas internas ahora es relativa
+GATEWAY_URL = "/api"
 
 # --- Rutas Principales ---
 @app.route('/')
 def dashboard():
-    products = api1_client.get_all_products()
-    categories = api2_client.get_all_categories()
-    brands = api3_client.get_all_brands()
-    units = api4_client.get_all_units()
+    base_url = request.url_root.rstrip('/') # Obtener la URL base de la app (ej. http://localhost:5000)
+    try:
+        products = requests.get(f"{base_url}{GATEWAY_URL}/products").json()
+        categories = requests.get(f"{base_url}{GATEWAY_URL}/categories").json()
+        brands = requests.get(f"{base_url}{GATEWAY_URL}/brands").json()
+        units = requests.get(f"{base_url}{GATEWAY_URL}/units").json()
+    except requests.exceptions.RequestException as e:
+        flash(f"Error al conectar con el API Gateway: {e}", "error")
+        products, categories, brands, units = [], [], [], []
 
-    category_map = {cat['id_cat']: cat['nom_cat'] for cat in categories}
-    brand_map = {brand['id']: brand['nombre'] for brand in brands}
-    unit_map = {unit['id']: unit['nombre'] for unit in units}
-
-    enriched_products = []
-    for product in products:
-        product['nom_cat'] = category_map.get(product.get('categoryId'), 'N/A')
-        product['nom_marca'] = brand_map.get(product.get('marcaId'), 'N/A')
-        product['nom_uni'] = unit_map.get(product.get('unitId'), 'N/A')
-        enriched_products.append(product)
-
-    return render_template(
-        'index.html',
-        products=enriched_products,
-        categories=categories,
-        brands=brands,
-        units=units
-    )
+    return render_template('index.html', products=products, categories=categories, brands=brands, units=units)
 
 # --- CRUD de Productos ---
 @app.route('/add', methods=['GET', 'POST'])
 def add_product():
+    base_url = request.url_root.rstrip('/')
     if request.method == 'POST':
-        # Lógica de validación de unidades
-        units = api4_client.get_all_units()
+        units = requests.get(f"{base_url}{GATEWAY_URL}/units").json()
         unit_map = {unit['id']: unit['nombre'] for unit in units}
         selected_unit_id = int(request.form['unit'])
         selected_unit_name = unit_map.get(selected_unit_id)
 
         if selected_unit_name in ['Unidad', 'Caja']:
-            quantity = request.form.get('quantity')
-            validation_result = api4_client.validate_quantity({"unidad": selected_unit_name, "cantidad": quantity})
+            validation_data = {"unidad": selected_unit_name, "cantidad": request.form.get('quantity')}
+            validation_result = requests.post(f"{base_url}{GATEWAY_URL}/units/validate", data=validation_data).json()
             if validation_result and validation_result.get('error'):
                 flash(f"Error de validación: {validation_result.get('error')}", 'error')
-                # Recargar el formulario con los datos ya introducidos
-                categories = api2_client.get_all_categories()
-                brands = api3_client.get_all_brands()
+                categories = requests.get(f"{base_url}{GATEWAY_URL}/categories").json()
+                brands = requests.get(f"{base_url}{GATEWAY_URL}/brands").json()
                 return render_template('product_form.html', product=request.form, categories=categories, brands=brands, units=units, title="Añadir Nuevo Producto")
 
-        # Si la validación pasa, crear el producto
         product_data = {
             "nom_pro": request.form['name'], "pre_pro": float(request.form['price']),
             "stk_pro": float(request.form['stock']), "id_cat": int(request.form['category']),
             "id_marca": int(request.form['brand']), "id_uni": selected_unit_id,
             "estado": request.form['state']
         }
-        api1_client.create_product(product_data)
+        requests.post(f"{base_url}{GATEWAY_URL}/products", json=product_data)
         return redirect(url_for('dashboard'))
 
-    # Para GET
-    categories = api2_client.get_all_categories()
-    brands = api3_client.get_all_brands()
-    units = api4_client.get_all_units()
+    categories = requests.get(f"{base_url}{GATEWAY_URL}/categories").json()
+    brands = requests.get(f"{base_url}{GATEWAY_URL}/brands").json()
+    units = requests.get(f"{base_url}{GATEWAY_URL}/units").json()
     return render_template('product_form.html', product={}, categories=categories, brands=brands, units=units, title="Añadir Nuevo Producto")
 
 @app.route('/edit/<int:product_id>', methods=['GET', 'POST'])
 def edit_product(product_id):
+    base_url = request.url_root.rstrip('/')
     if request.method == 'POST':
-        # Lógica de validación de unidades
-        units = api4_client.get_all_units()
+        units = requests.get(f"{base_url}{GATEWAY_URL}/units").json()
         unit_map = {unit['id']: unit['nombre'] for unit in units}
         selected_unit_id = int(request.form['unit'])
         selected_unit_name = unit_map.get(selected_unit_id)
 
         if selected_unit_name in ['Unidad', 'Caja']:
-            quantity = request.form.get('quantity')
-            validation_result = api4_client.validate_quantity({"unidad": selected_unit_name, "cantidad": quantity})
+            validation_data = {"unidad": selected_unit_name, "cantidad": request.form.get('quantity')}
+            validation_result = requests.post(f"{base_url}{GATEWAY_URL}/units/validate", data=validation_data).json()
             if validation_result and validation_result.get('error'):
                 flash(f"Error de validación: {validation_result.get('error')}", 'error')
-                # Recargar el formulario con los datos ya introducidos
-                categories = api2_client.get_all_categories()
-                brands = api3_client.get_all_brands()
+                categories = requests.get(f"{base_url}{GATEWAY_URL}/categories").json()
+                brands = requests.get(f"{base_url}{GATEWAY_URL}/brands").json()
                 product_data = request.form.to_dict()
-                product_data['id_pro'] = product_id # Mantener el ID para la URL del formulario
+                product_data['id_pro'] = product_id
                 return render_template('product_form.html', product=product_data, categories=categories, brands=brands, units=units, title="Editar Producto")
 
-        # Si la validación pasa, actualizar el producto
         product_data = {
             "id_pro": product_id, "nom_pro": request.form['name'],
             "pre_pro": float(request.form['price']), "stk_pro": float(request.form['stock']),
             "id_cat": int(request.form['category']), "id_marca": int(request.form['brand']),
             "id_uni": selected_unit_id, "estado": request.form['state']
         }
-        api1_client.update_product(product_data)
+        requests.put(f"{base_url}{GATEWAY_URL}/products", json=product_data)
         return redirect(url_for('dashboard'))
 
-    # Para GET
-    product_to_edit = api1_client.get_product_by_id(product_id)
-    categories = api2_client.get_all_categories()
-    brands = api3_client.get_all_brands()
-    units = api4_client.get_all_units()
+    product_to_edit = requests.get(f"{base_url}{GATEWAY_URL}/products/{product_id}").json()
+    categories = requests.get(f"{base_url}{GATEWAY_URL}/categories").json()
+    brands = requests.get(f"{base_url}{GATEWAY_URL}/brands").json()
+    units = requests.get(f"{base_url}{GATEWAY_URL}/units").json()
     return render_template('product_form.html', product=product_to_edit, categories=categories, brands=brands, units=units, title="Editar Producto")
 
 @app.route('/delete/<int:product_id>', methods=['POST'])
 def delete_product_route(product_id):
-    api1_client.delete_product(product_id)
+    base_url = request.url_root.rstrip('/')
+    requests.delete(f"{base_url}{GATEWAY_URL}/products/{product_id}")
     return redirect(url_for('dashboard'))
 
 # --- CRUD de Categorías ---
 @app.route('/category/add', methods=['GET', 'POST'])
 def add_category():
+    base_url = request.url_root.rstrip('/')
     if request.method == 'POST':
         category_data = {"nom_cat": request.form['name'], "descripcion": request.form['description']}
-        api2_client.create_category(category_data)
+        requests.post(f"{base_url}{GATEWAY_URL}/categories", json=category_data)
         return redirect(url_for('dashboard'))
     return render_template('category_form.html', category={}, title="Añadir Nueva Categoría")
 
 @app.route('/category/edit/<int:category_id>', methods=['GET', 'POST'])
 def edit_category(category_id):
+    base_url = request.url_root.rstrip('/')
     if request.method == 'POST':
         category_data = {"nom_cat": request.form['name'], "descripcion": request.form['description']}
-        api2_client.update_category(category_id, category_data)
+        requests.put(f"{base_url}{GATEWAY_URL}/categories/{category_id}", json=category_data)
         return redirect(url_for('dashboard'))
-    category_to_edit = api2_client.get_category_by_id(category_id)
+    category_to_edit = requests.get(f"{base_url}{GATEWAY_URL}/categories/{category_id}").json()
     return render_template('category_form.html', category=category_to_edit, title="Editar Categoría")
 
 @app.route('/category/delete/<int:category_id>', methods=['POST'])
 def delete_category_route(category_id):
-    api2_client.delete_category(category_id)
+    base_url = request.url_root.rstrip('/')
+    requests.delete(f"{base_url}{GATEWAY_URL}/categories/{category_id}")
     return redirect(url_for('dashboard'))
 
 # --- CRUD de Marcas ---
 @app.route('/brand/add', methods=['GET', 'POST'])
 def add_brand():
+    base_url = request.url_root.rstrip('/')
     if request.method == 'POST':
         brand_data = {"nombre": request.form['name']}
-        api3_client.create_brand(brand_data)
+        requests.post(f"{base_url}{GATEWAY_URL}/brands", json=brand_data)
         return redirect(url_for('dashboard'))
     return render_template('brand_form.html', brand={}, title="Añadir Nueva Marca")
 
 # --- Lógica de Unidades ---
 @app.route('/unit/validate', methods=['POST'])
 def validate_unit():
+    base_url = request.url_root.rstrip('/')
     validation_data = {"unidad": request.form['unit_name'], "cantidad": request.form['quantity']}
-    result = api4_client.validate_quantity(validation_data)
+    result = requests.post(f"{base_url}{GATEWAY_URL}/units/validate", data=validation_data).json()
     if result:
         message = result.get('ok') or result.get('error') or 'No se recibió un mensaje claro.'
         flash(message, 'info')
