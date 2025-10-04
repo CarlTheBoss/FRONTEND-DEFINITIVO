@@ -1,0 +1,169 @@
+body {
+  font-family: sans-serif;
+  line-height: 1.6;
+  margin: 0;
+  padding: 20px;
+  background-color: #f4f4f4;
+  color: #333;
+}
+
+header,
+footer {
+  text-align: center;
+  padding: 1rem;
+  background-color: #333;
+  color: #fff;
+  margin-bottom: 20px;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+section {
+  background: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+}
+
+/* Estilos para tablas */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+/* Grid para las secciones de datos */
+.data-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 20px;
+}
+
+/* Estilos para botones */
+.btn {
+  padding: 8px 12px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: white;
+  cursor: pointer;
+  border: none;
+  font-size: 14px;
+}
+
+.btn-edit {
+  background-color: #ffc107; /* Amarillo */
+}
+
+.btn-add {
+  background-color: #007bff; /* Azul */
+}
+
+.btn-delete {
+  background-color: #dc3545; /* Rojo */
+}
+
+/* Estilos para el formulario */
+.form-container {
+  max-width: 600px;
+  margin: 20px auto;
+}
+
+.form-group {
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.form-actions button,
+.form-actions a {
+  padding: 10px 15px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: white;
+  border: none;
+}
+
+.form-actions button {
+  background-color: #28a745; /* Verde */
+}
+
+.form-actions a {
+  background-color: #6c757d; /* Gris */
+}
+
+/* Estilos para la cabecera de la sección */
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+/* Estilos para la celda de acciones */
+.actions-cell {
+  display: flex;
+  gap: 10px;
+}
+
+/* Estilos para el formulario de validación de unidades */
+.validation-form {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
+}
+
+.validation-form h4 {
+  margin-top: 0;
+}
+
+.flash-message {
+  margin-bottom: 15px;
+  padding: 10px;
+  border-radius: 4px;
+  background-color: #e2e3e5;
+  border: 1px solid #d6d8db;
+}
+
+.flash-message.error {
+  background-color: #f8d7da;
+  border-color: #f5c6cb;
+  color: #721c24;
+}

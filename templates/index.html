@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard de Productos</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}"
+    />
+  </head>
+  <body>
+    <header>
+      <h1>Dashboard de Productos</h1>
+    </header>
+    <main>
+      <section class="product-table">
+        <div class="section-header">
+          <h2>Lista de Productos</h2>
+          <a href="{{ url_for('add_product') }}" class="btn btn-add"
+            >Añadir Nuevo Producto</a
+          >
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre</th>
+              <th>Precio</th>
+              <th>Stock</th>
+              <th>Categoría</th>
+              <th>Marca</th>
+              <th>Unidad</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for product in products %}
+            <tr>
+              <td>{{ product.name }}</td>
+              <td>{{ product.price }}</td>
+              <td>{{ product.stock }}</td>
+              <td>{{ product.nom_cat }}</td>
+              <td>{{ product.nom_marca }}</td>
+              <td>{{ product.nom_uni }}</td>
+              <td class="actions-cell">
+                <a
+                  href="{{ url_for('edit_product', product_id=product.id) }}"
+                  class="btn btn-edit"
+                  >Editar</a
+                >
+                <form
+                  action="{{ url_for('delete_product_route', product_id=product.id) }}"
+                  method="post"
+                  style="display: inline"
+                >
+                  <button
+                    type="submit"
+                    class="btn btn-delete"
+                    onclick="return confirm('¿Estás seguro de que quieres eliminar este producto?');"
+                  >
+                    Borrar
+                  </button>
+                </form>
+              </td>
+            </tr>
+            {% else %}
+            <tr>
+              <td colspan="7">No se encontraron productos.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+      <div class="data-grid">
+        <section>
+          <div class="section-header">
+            <h2>Categorías</h2>
+            <a href="{{ url_for('add_category') }}" class="btn btn-add"
+              >Añadir</a
+            >
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for cat in categories %}
+              <tr>
+                <td>{{ cat.id_cat }}</td>
+                <td>{{ cat.nom_cat }}</td>
+                <td class="actions-cell">
+                  <a
+                    href="{{ url_for('edit_category', category_id=cat.id_cat) }}"
+                    class="btn btn-edit"
+                    >Editar</a
+                  >
+                  <form
+                    action="{{ url_for('delete_category_route', category_id=cat.id_cat) }}"
+                    method="post"
+                    style="display: inline"
+                  >
+                    <button
+                      type="submit"
+                      class="btn btn-delete"
+                      onclick="return confirm('¿Estás seguro de que quieres eliminar esta categoría?');"
+                    >
+                      Borrar
+                    </button>
+                  </form>
+                </td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="3">No hay categorías.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+        <section>
+          <div class="section-header">
+            <h2>Marcas</h2>
+            <a href="{{ url_for('add_brand') }}" class="btn btn-add">Añadir</a>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for brand in brands %}
+              <tr>
+                <td>{{ brand.id }}</td>
+                <td>{{ brand.nombre }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="2">No hay marcas.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </section>
+        <section>
+          <div class="section-header">
+            <h2>Unidades</h2>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nombre</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for unit in units %}
+              <tr>
+                <td>{{ unit.id }}</td>
+                <td>{{ unit.nombre }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td colspan="2">No hay unidades.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+          <div class="validation-form">
+            <h4>Probar Lógica de Negocio</h4>
+            <form action="{{ url_for('validate_unit') }}" method="post">
+              <div class="form-group">
+                <label for="unit_name">Unidad:</label>
+                <select id="unit_name" name="unit_name">
+                  {% for unit in units %}
+                  <option value="{{ unit.nombre }}">{{ unit.nombre }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="quantity">Cantidad:</label>
+                <input
+                  type="number"
+                  id="quantity"
+                  name="quantity"
+                  value="1"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn btn-add">Validar</button>
+            </form>
+            {% with messages = get_flashed_messages() %} {% if messages %}
+            <div class="flash-message">
+              <strong>Respuesta de la API:</strong> {{ messages[0] }}
+            </div>
+            {% endif %} {% endwith %}
+          </div>
+        </section>
+      </div>
+    </main>
+    <footer>
+      <p>Dashboard creado con Flask y consumiendo 4 APIs.</p>
+    </footer>
+  </body>
+</html>

@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>{{ title }}</h1>
+    </header>
+    <main>
+        <section class="form-container">
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="flash-message {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            <form method="post">
+                <div class="form-group">
+                    <label for="name">Nombre del Producto:</label>
+                    <input type="text" id="name" name="name" value="{{ product.get('nom_pro') or product.get('name', '') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="price">Precio:</label>
+                    <input type="number" step="0.01" id="price" name="price" value="{{ product.get('pre_pro') or product.get('price', '') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="stock">Stock:</label>
+                    <input type="number" step="0.01" id="stock" name="stock" value="{{ product.get('stk_pro') or product.get('stock', '') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="category">Categoría:</label>
+                    <select id="category" name="category">
+                        {% for cat in categories %}
+                        <option value="{{ cat.id_cat }}" {% if cat.id_cat == (product.get('id_cat') or product.get('category'))|int %}selected{% endif %}>
+                            {{ cat.nom_cat }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="brand">Marca:</label>
+                    <select id="brand" name="brand">
+                        {% for brand in brands %}
+                        <option value="{{ brand.id }}" {% if brand.id == (product.get('id_marca') or product.get('brand'))|int %}selected{% endif %}>
+                            {{ brand.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="unit">Unidad:</label>
+                    <select id="unit" name="unit" onchange="toggleQuantityField()">
+                        {% for unit in units %}
+                        <option value="{{ unit.id }}" data-name="{{ unit.nombre }}" {% if unit.id == (product.get('id_uni') or product.get('unit'))|int %}selected{% endif %}>
+                            {{ unit.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group" id="quantity-group" style="display: none;">
+                    <label for="quantity">Cantidad:</label>
+                    <input type="number" id="quantity" name="quantity" value="{{ product.get('quantity', '1') }}">
+                </div>
+                <div class="form-group">
+                    <label for="state">Estado:</label>
+                    <select id="state" name="state">
+                        <option value="Y" {% if (product.get('estado') or product.get('state')) == 'Y' %}selected{% endif %}>Activo</option>
+                        <option value="N" {% if (product.get('estado') or product.get('state')) == 'N' %}selected{% endif %}>Inactivo</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="submit">Guardar Cambios</button>
+                    <a href="{{ url_for('dashboard') }}">Cancelar</a>
+                </div>
+            </form>
+        </section>
+    </main>
+    <script>
+        function toggleQuantityField() {
+            const unitSelect = document.getElementById('unit');
+            const selectedOption = unitSelect.options[unitSelect.selectedIndex];
+            const unitName = selectedOption.getAttribute('data-name');
+            const quantityGroup = document.getElementById('quantity-group');
+
+            if (unitName === 'Unidad' || unitName === 'Caja') {
+                quantityGroup.style.display = 'block';
+            } else {
+                quantityGroup.style.display = 'none';
+            }
+        }
+        // Ejecutar la función al cargar la página para comprobar el estado inicial
+        document.addEventListener('DOMContentLoaded', toggleQuantityField);
+    </script>
+</body>
+</html>
