@@ -18,6 +18,5 @@ COPY . .
 EXPOSE 10000
 
 # Comando para ejecutar la aplicación usando Gunicorn
-# Render establece la variable de entorno PORT. Gunicorn la usará.
-# 'app:app' significa: del archivo 'app.py', usa la variable 'app' (nuestra Flask app).
-CMD ["gunicorn", "--bind", "0.0.0.0:${PORT}", "app:app"]
+# Esta sintaxis (shell form) permite la sustitución de variables de entorno como ${PORT}
+CMD gunicorn --bind 0.0.0.0:${PORT} app:app
