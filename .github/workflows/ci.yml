@@ -1,0 +1,41 @@
+# Nombre del Workflow
+name: Python CI
+
+# Define cuándo se ejecutará el workflow
+on:
+  push:
+    branches: ["main"] # Se ejecuta en cada push a la rama main
+  pull_request:
+    branches: ["main"] # También en pull requests a la rama main
+
+# Define los trabajos (jobs) que se ejecutarán
+jobs:
+  build:
+    # El tipo de máquina en la que se ejecutará el job
+    runs-on: ubuntu-latest
+
+    # Los pasos que componen el job
+    steps:
+      # 1. Clona tu repositorio en la máquina virtual
+      - uses: actions/checkout@v3
+
+      # 2. Configura el entorno de Python
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.9
+
+      # 3. Instala las dependencias
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 4. Ejecuta el linter (flake8) para revisar la calidad del código
+      - name: Lint with flake8
+        run: |
+          # --count muestra el número total de errores
+          # --select=E9,F63,F7,F82 ignora algunos errores comunes en proyectos simples
+          # --show-source muestra la línea de código con el error
+          # --statistics muestra estadísticas de los errores
+          flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
