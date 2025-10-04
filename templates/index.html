@@ -35,14 +35,14 @@
           </thead>
           <tbody>
             {% for product in products %}
-            <tr>
+            <tr class="product-row" onclick="openProductModal({{ product.id }}, '{{ product.name }}', '{{ product.price }}', '{{ product.stock }}', '{{ product.nom_cat }}', '{{ product.nom_marca }}', '{{ product.nom_uni }}')">
               <td>{{ product.name }}</td>
               <td>{{ product.price }}</td>
               <td>{{ product.stock }}</td>
               <td>{{ product.nom_cat }}</td>
               <td>{{ product.nom_marca }}</td>
               <td>{{ product.nom_uni }}</td>
-              <td class="actions-cell">
+              <td class="actions-cell" onclick="event.stopPropagation()">
                 <a
                   href="{{ url_for('edit_product', product_id=product.id) }}"
                   class="btn btn-edit"
@@ -207,5 +207,66 @@
     <footer>
       <p>Dashboard creado con Flask y consumiendo 4 APIs.</p>
     </footer>
+
+    <div id="productModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close" onclick="closeProductModal()">&times;</span>
+        <h2 class="modal-title">Detalles del Producto</h2>
+        <div class="modal-body">
+          <div class="detail-row">
+            <span class="detail-label">ID:</span>
+            <span class="detail-value" id="modal-id"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Nombre:</span>
+            <span class="detail-value" id="modal-name"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Precio:</span>
+            <span class="detail-value" id="modal-price"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Stock:</span>
+            <span class="detail-value" id="modal-stock"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Categoría:</span>
+            <span class="detail-value" id="modal-category"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Marca:</span>
+            <span class="detail-value" id="modal-brand"></span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Unidad:</span>
+            <span class="detail-value" id="modal-unit"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      function openProductModal(id, name, price, stock, category, brand, unit) {
+        document.getElementById('modal-id').textContent = id;
+        document.getElementById('modal-name').textContent = name;
+        document.getElementById('modal-price').textContent = '$' + price;
+        document.getElementById('modal-stock').textContent = stock + ' unidades';
+        document.getElementById('modal-category').textContent = category;
+        document.getElementById('modal-brand').textContent = brand;
+        document.getElementById('modal-unit').textContent = unit;
+        document.getElementById('productModal').style.display = 'flex';
+      }
+
+      function closeProductModal() {
+        document.getElementById('productModal').style.display = 'none';
+      }
+
+      window.onclick = function(event) {
+        const modal = document.getElementById('productModal');
+        if (event.target == modal) {
+          closeProductModal();
+        }
+      }
+    </script>
   </body>
 </html>
